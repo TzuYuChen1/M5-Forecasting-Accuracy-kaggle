@@ -1,26 +1,28 @@
 # M5 Sales Forecasting — Retail Demand Prediction at Scale
 
-This project applies the M5 Forecasting Accuracy competition dataset — 30,490 Walmart product-store time series across California, Texas, and Wisconsin — to build a 28-day demand forecasting pipeline. The workflow covers data cleaning and memory optimization, external data integration, systematic feature engineering experimentation (16 controlled ablations from a 14-feature baseline), multi-model comparison (LightGBM, Random Forest, Ridge Regression, GRU), and two-phase hyperparameter tuning using grid search and Optuna. The final submission is a 3-seed LightGBM ensemble using recursive forecasting, achieving a private leaderboard WRMSSE of **0.59212**.
+**A end-to-end machine learning pipeline for 28-day retail demand forecasting**
 
 📍 University of Minnesota · Carlson School of Management · MSBA Program
 
 ---
 
-## Business Problem
+## Executive Summary
 
-Accurate retail demand forecasting directly enables:
+This project applies the M5 Forecasting Accuracy competition dataset — 30,490 Walmart product-store time series across California, Texas, and Wisconsin — to build a 28-day demand forecasting pipeline. The workflow covers data cleaning and memory optimization, external data integration, systematic feature engineering experimentation (16 controlled ablations from a 14-feature baseline), multi-model comparison (LightGBM, Random Forest, Ridge Regression, GRU), and two-phase hyperparameter tuning using grid search and Optuna. The final submission is a 3-seed LightGBM ensemble using recursive forecasting, achieving a private leaderboard WRMSSE of **0.59212**.
 
-- **Inventory planning** — avoid stockouts on high-velocity items and reduce overstock on slow movers
-- **Promotional response modeling** — quantify demand lift from SNAP benefit days and calendar events
-- **Store-level resource allocation** — align replenishment schedules to actual expected sales patterns
+**Key deliverables:**
 
-This project simulates the core analytical workflow a demand forecasting team would execute: starting from raw historical sales data, engineering predictive features, selecting and tuning a model, and producing a competition-style 28-day forecast.
+- Memory-optimized data pipeline converting wide-format sales history into a long-format modeling dataset
+- Systematic feature ablation study across 16 controlled experiments
+- Multi-model comparison across four model families
+- Two-phase hyperparameter optimization (grid search + Optuna)
+- Recursive 28-day ensemble forecast submitted to Kaggle
 
 ---
 
 ## Results
 
-### Model Comparison
+**Best Kaggle submission:** 3-seed LightGBM ensemble · Private WRMSSE **0.59212** · Public WRMSSE 0.62949
 
 ![Model Comparison](results/images/model_comparison.png)
 
@@ -32,21 +34,6 @@ This project simulates the core analytical workflow a demand forecasting team wo
 | GRU (RNN) | 2.2584 | 1.149 | seq_len=28, units=32; stopped at epoch 3 |
 | LightGBM Baseline (E0) | 2.1619 | 1.017 | 14 features; no tuning |
 
-### Kaggle Leaderboard
-
-![Kaggle Score](results/kaggle_best_score.png)
-
-| Metric | Score |
-|---|---|
-| **Private score (WRMSSE)** | **0.59212** |
-| Public score (WRMSSE) | 0.62949 |
-
-### Feature Importance (Final Model)
-
-![Feature Importance](results/images/feature_importance.png)
-
-The top features by information gain are all time-series history signals — 7-day rolling mean (`rmean_7`), item identity (`item_id`), and 28-day rolling mean (`rmean_28`) — confirming that recent demand momentum dominates over external signals.
-
 ---
 
 ## Repository Structure
@@ -55,35 +42,35 @@ The top features by information gain are all time-series history signals — 7-d
 .
 ├── notebooks/
 │   ├── 01_data_cleaning_and_preparation.ipynb      # Parse, downcast, melt wide→long, merge tables
-│   ├── 02_external_data_integration.ipynb          # Weather/external data exploration
-│   ├── 03_feature_engineering_experiments.ipynb    # Systematic FE experiments (E0–E10, combinations)
+│   ├── 02_external_data_integration.ipynb          # Weather & external feature exploration
+│   ├── 03_feature_engineering_experiments.ipynb    # 16 controlled FE ablations (E0–E10 + combinations)
 │   ├── 04a_model_exploration_rf_ridge.ipynb        # Random Forest & Ridge Regression
 │   ├── 04b_model_exploration_gru.ipynb             # GRU (RNN) model
 │   ├── 04c_lgbm_hyperparameter_tuning.ipynb        # 2-phase grid search + Optuna tuning
 │   ├── 05_final_forecast_submission.ipynb          # 3-seed ensemble, recursive 28-day forecast
 │   └── experiments/
 │       ├── exp01_baseline_lgbm_pipeline.ipynb      # Initial LightGBM baseline on cleaned data
-│       ├── exp02_feature_experiments_E1_E4.ipynb   # Individual feature group tests E1–E4
-│       └── exp03_feature_experiments_E5_E9.ipynb   # Individual feature group tests E5–E9
+│       ├── exp02_feature_experiments_E1_E4.ipynb   # Individual ablation tests, feature groups E1–E4
+│       └── exp03_feature_experiments_E5_E9.ipynb   # Individual ablation tests, feature groups E5–E9
 │
 ├── results/
-│   ├── model_performance_summary.csv               # All models with RMSE, MAE
-│   ├── experiment_results_summary.csv              # All FE experiments vs. baseline
-│   ├── feature_engineering_table.csv               # Feature descriptions and leakage-safety notes
-│   ├── final_model_feature_importance.csv          # LightGBM gain-based importance (final model)
-│   ├── best_lgbm_params.json                       # Optuna best hyperparameters (trial 37)
-│   ├── kaggle_best_score.png                       # Kaggle leaderboard screenshot
+│   ├── model_performance_summary.csv
+│   ├── experiment_results_summary.csv
+│   ├── feature_engineering_table.csv
+│   ├── final_model_feature_importance.csv
+│   ├── best_lgbm_params.json
+│   ├── kaggle_best_score.png
 │   └── images/
 │       ├── model_comparison.png
 │       ├── feature_importance.png
 │       └── fe_experiments.png
 │
 ├── docs/
-│   ├── presentation.pdf                            # Team slide deck
-│   └── project_report.pdf                         # Full write-up with methodology tables & figures
+│   ├── presentation.pdf
+│   └── project_report.pdf
 │
 ├── data/
-│   └── README.md                                   # Kaggle download instructions & expected layout
+│   └── README.md                                   # Kaggle download instructions
 │
 ├── requirements.txt
 └── .gitignore
@@ -91,21 +78,52 @@ The top features by information gain are all time-series history signals — 7-d
 
 ---
 
-## Methodology
+## 01 — Data Cleaning & Preparation
 
-### 1. Data Cleaning & Preparation (`01`)
+Ingests three raw Kaggle files and produces a single cleaned long-format parquet that all downstream notebooks consume.
 
-- **Type parsing & downcasting** — reduces memory footprint by ~440 MB before the melt step
-- **Leading-zero detection** — items not yet on shelf are flagged as inactive to avoid leaking zero demand into training
-- **Wide → long melt** — converts 1,941 daily columns into a single `demand` column; merges `calendar` and `sell_prices`
+**Type parsing & memory optimization**
 
-### 2. External Data Integration (`02`)
+Downcasts numeric columns across `sales_train_evaluation.csv`, `sell_prices.csv`, and `calendar.csv` before any joins, reducing memory footprint by ~440 MB. Calendar date strings are parsed to datetime; event NaN fields are filled with `"NoEvent"` (1,807 of 1,969 days have no event).
 
-Weather observations (max/min temperature, z-scores) and additional SNAP/event indicators were explored. Weather features produced no meaningful RMSE improvement (< 0.0001 vs. baseline) and are **not part of the final model**. The code is retained for reproducibility.
+**Leading-zero detection**
 
-### 3. Feature Engineering (`03`)
+Items not yet on shelf have a streak of leading zeros in their sales history. These rows are flagged as `is_active = 0` to prevent leaking zero demand into training as if it were genuine low-demand signal.
 
-Starting from a **14-feature baseline (E0)**, 16 controlled experiments (E0–E10 plus named combinations) were run to measure the incremental RMSE impact of each feature group.
+**Wide → long melt**
+
+Converts 1,941 daily sales columns into a single `demand` column, then merges `calendar` and `sell_prices` on date and item-store keys. Output: `cleaned_data/long_df_clean.parquet`.
+
+Key data facts after cleaning:
+- **30,490 time series** (3,049 items × 10 stores)
+- 1,941 days of history per series
+- Millions of daily observations in long format
+
+📓 Notebook: [01\_data\_cleaning\_and\_preparation.ipynb](notebooks/01_data_cleaning_and_preparation.ipynb)
+
+---
+
+## 02 — External Data Integration
+
+Explores whether external signals improve forecast accuracy beyond the internal demand history.
+
+**SNAP & event indicators**
+
+`snap_flag` (whether SNAP benefits are active in the listing's state on a given day) and `is_event` (any holiday or promotional event) are sourced from `calendar.csv`. These are later confirmed as the most impactful additions in the feature engineering experiments.
+
+**Weather data (exploratory)**
+
+Daily temperature records (max/min, z-scores) for California, Texas, and Wisconsin were assembled from public NOAA data and joined to the sales dataset. Weather features produced no meaningful RMSE improvement (delta < 0.0001 vs. baseline) and are **not part of the final model**. The join code is retained for reproducibility.
+
+If reproducing the weather experiment, place `weather.csv` at `data/raw/weather.csv`. Expected columns: `STATION`, `DATE`, `TMIN`, `TMAX`, `PRCP`, `SNOW`.
+
+📓 Notebook: [02\_external\_data\_integration.ipynb](notebooks/02_external_data_integration.ipynb)
+
+---
+
+## 03 — Feature Engineering Experiments
+
+Runs 16 controlled ablation experiments to identify which features improve over the 14-feature baseline, using a consistent train/validation split throughout.
 
 **Baseline features (E0) — 14 total:**
 
@@ -116,7 +134,7 @@ Starting from a **14-feature baseline (E0)**, 16 controlled experiments (E0–E1
 | Price | `sell_price`, `price_change`, `is_promo` |
 | Lag & Rolling | `lag_7`, `lag_28`, `rmean_7`, `rmean_28` |
 
-**Experiment results:**
+**Experiment results (selected):**
 
 | Experiment | Added Features | RMSE | vs Baseline |
 |---|---|---|---|
@@ -125,25 +143,49 @@ Starting from a **14-feature baseline (E0)**, 16 controlled experiments (E0–E1
 | E1 — Demand lag | `lag_56` | 2.1578 | −0.0041 |
 | **E7+E1 — Combination ★** | **`snap_flag`, `is_event`, `lag_56`** | **2.1322** | **−0.0297** |
 | E9 — All E5~E8 | All price/promo/event/hierarchy | 2.1364 | −0.0255 |
-| E2 — Demand lag | `lag_365` | 2.1864 | +0.0245 |
+| E2 — Demand lag | `lag_365` | 2.1864 | +0.0245 *(rejected)* |
 
 ![Feature Engineering Experiments](results/images/fe_experiments.png)
 
-Key leakage-safety principle: all lag/rolling features use a minimum shift equal to or beyond the 28-day forecast horizon. `lag_56` is the shortest safe additional lag.
+**Leakage-safety principle:** all lag and rolling features use a minimum shift equal to or beyond the 28-day forecast horizon. `lag_56` is the shortest safe additional lag; `lag_365` introduced too many NaNs at series start and was rejected.
 
-**Features tested but not selected:**
-- `lag_365` — too many NaNs at the start of series (RMSE worsened)
-- Price enhancement features (`price_vs_mean`, `price_vs_dept_avg`) — marginal gain, added noise
-- Weather features — no meaningful improvement over baseline (RMSE delta < 0.0001)
+Features tested but not selected: `lag_365` (NaN degradation), price enhancement features (`price_vs_mean`, `price_vs_dept_avg`) (marginal gain, added noise), and weather features (RMSE delta < 0.0001).
 
-### 4. Model Exploration (`04a`, `04b`, `04c`)
+📓 Notebook: [03\_feature\_engineering\_experiments.ipynb](notebooks/03_feature_engineering_experiments.ipynb)
 
-RF, Ridge, and GRU models were trained on the 17-feature E7+E1 feature set. The final LightGBM model includes `is_active` as an additional indicator, bringing the total to 18 features.
+---
 
-**LightGBM Hyperparameter Tuning** used a two-phase strategy:
+## 04a — Model Exploration: Random Forest & Ridge Regression
 
-- **Phase 1 — Grid search** (12 configurations): identifies which parameter directions help. Best: `set_06_tweedie_low` (RMSE 2.0065), lowering `tweedie_variance_power` from 1.5 → 1.2
-- **Phase 2 — Focused Optuna search** (40 trials): zooms into the Phase 1 winner region. Best: trial 37 (RMSE **2.0025**)
+Trains Random Forest and Ridge Regression on the 17-feature E7+E1 feature set as alternative baselines to LightGBM.
+
+**Random Forest** — `n_estimators=300`, `max_depth=20`; RMSE 2.0802, MAE 1.032. Captures non-linear interactions but slower to train than LightGBM and less competitive on tabular time-series data at this scale.
+
+**Ridge Regression** — `alpha=0.5`; RMSE 2.1180, MAE 1.051. Fastest model to train (0.13s); establishes the linear baseline. Performance gap vs. LightGBM confirms non-linear demand patterns dominate.
+
+📓 Notebook: [04a\_model\_exploration\_rf\_ridge.ipynb](notebooks/04a_model_exploration_rf_ridge.ipynb)
+
+---
+
+## 04b — Model Exploration: GRU
+
+Trains a lightweight GRU (Gated Recurrent Unit) model on the E7+E1 feature set to evaluate whether sequence modeling adds value over tree-based methods.
+
+**Architecture** — `seq_len=28`, `units=32`, `dropout=0.10`; trained in Google Colab. Stopped early at epoch 3 (validation loss plateaued). RMSE 2.2584, MAE 1.149 — the weakest of all four model families tested.
+
+The GRU underperforms relative to LightGBM likely because: (1) the feature set already captures most temporal structure via explicit lags and rolling means, leaving little signal for the RNN to extract from raw sequences; and (2) the M5 dataset's sparsity and heterogeneity across 30,490 series makes sequence alignment difficult without item-specific sequence modeling.
+
+📓 Notebook: [04b\_model\_exploration\_gru.ipynb](notebooks/04b_model_exploration_gru.ipynb)
+
+---
+
+## 04c — LightGBM Hyperparameter Tuning
+
+Uses a two-phase search strategy to optimize LightGBM on the 17-feature E7+E1 set, then confirms the best parameters before final training.
+
+**Phase 1 — Grid search** (12 configurations): systematically varies objective function, `tweedie_variance_power`, `num_leaves`, and learning rate to identify which directions help. Best configuration: `set_06_tweedie_low` (RMSE 2.0065), which lowered `tweedie_variance_power` from 1.5 → 1.2.
+
+**Phase 2 — Focused Optuna search** (40 trials): zooms into the Phase 1 winner region with a narrowed search space. Best: trial 37 (RMSE **2.0025**).
 
 Best hyperparameters ([`results/best_lgbm_params.json`](results/best_lgbm_params.json)):
 
@@ -163,45 +205,58 @@ Best hyperparameters ([`results/best_lgbm_params.json`](results/best_lgbm_params
 }
 ```
 
-### 5. Final 28-Day Recursive Forecast (`05`)
+📓 Notebook: [04c\_lgbm\_hyperparameter\_tuning.ipynb](notebooks/04c_lgbm_hyperparameter_tuning.ipynb)
 
-The final submission uses **recursive forecasting** with a **3-seed LightGBM ensemble** (seeds 42, 123, 2024 — same hyperparameters, predictions averaged). Each of the 28 days is predicted in order, with predicted values appended to the history so they can serve as lag/rolling inputs for subsequent days.
+---
 
-- Forecast period: days 1942–1969 (the Kaggle evaluation window)
+## 05 — Final Forecast Submission
+
+Produces the Kaggle submission using a 3-seed LightGBM ensemble with recursive 28-day forecasting.
+
+**Feature set** — 18 features: the E7+E1 set (17 features) plus `is_active`, added to suppress predicted demand for items not yet on shelf.
+
+**Recursive forecasting** — each of the 28 forecast days is predicted in order. Predicted values are appended to the history so they serve as lag/rolling inputs for subsequent days, mirroring real-world deployment where future demand is unknown at inference time.
+
+**Seed ensemble** — three independent LightGBM models trained with seeds 42, 123, and 2024 (identical hyperparameters). Predictions are averaged to reduce variance, a standard competition technique.
+
+**Submission scope:**
+- Forecast period: days 1942–1969 (Kaggle evaluation window)
 - Total predictions: 853,720 (30,490 series × 28 days)
-- Submission format: 60,980 rows (30,490 validation + 30,490 evaluation IDs × 28 columns F1–F28)
+- Submission file: 60,980 rows × 28 columns (F1–F28)
 
-### Experiments (`experiments/`)
+**Kaggle result:**
 
-Three exploratory notebooks that preceded the consolidated pipeline:
+![Kaggle Score](results/kaggle_best_score.png)
 
-- **`exp01_baseline_lgbm_pipeline`** — initial streamlined LightGBM baseline on the cleaned long-format dataset; establishes the reference RMSE before feature experimentation
-- **`exp02_feature_experiments_E1_E4`** — individual ablation tests for feature groups E1–E4 (demand lags, rolling stats, price features)
-- **`exp03_feature_experiments_E5_E9`** — individual ablation tests for feature groups E5–E9 (promo indicators, event/SNAP flags, hierarchy aggregates)
+| Metric | Score |
+|---|---|
+| **Private WRMSSE** | **0.59212** |
+| Public WRMSSE | 0.62949 |
 
-Results from these notebooks were consolidated into `03_feature_engineering_experiments.ipynb`.
-
----
-
-## Dataset
-
-**Source:** [Kaggle M5 Forecasting — Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy)
-
-| File | Description | Size |
-|---|---|---|
-| `sales_train_evaluation.csv` | Daily unit sales in wide format — 3,049 items × 1,941 days | ~120 MB |
-| `sell_prices.csv` | Weekly item sell price per store | ~200 MB |
-| `calendar.csv` | Date metadata — day-of-week, SNAP flags, event names | ~100 KB |
-
-Raw data is not included in this repository due to file size. See [`data/README.md`](data/README.md) for download instructions.
-
-Key data facts after cleaning:
-- **30,490 time series** (3,049 items × 10 stores), 1,941 days of history
-- Memory reduced by ~440 MB via downcasting before the melt step
+📓 Notebook: [05\_final\_forecast\_submission.ipynb](notebooks/05_final_forecast_submission.ipynb)
 
 ---
 
-## How to Run
+## Experiments
+
+Three exploratory notebooks that preceded the consolidated pipeline. Results from these informed the experiment design in `03_feature_engineering_experiments.ipynb`.
+
+**`exp01_baseline_lgbm_pipeline`** — initial streamlined LightGBM baseline on the cleaned long-format dataset; establishes the reference RMSE before feature experimentation begins.
+
+**`exp02_feature_experiments_E1_E4`** — individual ablation runs for feature groups E1–E4 (demand lags `lag_56`, `lag_365`; rolling stats `rstd_28`, `rmean_56`, `rmax_28`, `rmin_28`; price features `price_vs_mean`, `price_vs_dept_avg`).
+
+**`exp03_feature_experiments_E5_E9`** — individual ablation runs for feature groups E5–E9 (promo indicators `is_price_drop`, `is_price_min_7d`; event/SNAP flags `snap_flag`, `is_event`; hierarchy aggregates `dept_avg_demand`, `store_avg_demand`).
+
+📓 Notebooks: [exp01](notebooks/experiments/exp01_baseline_lgbm_pipeline.ipynb) · [exp02](notebooks/experiments/exp02_feature_experiments_E1_E4.ipynb) · [exp03](notebooks/experiments/exp03_feature_experiments_E5_E9.ipynb)
+
+---
+
+## Setup & Usage
+
+### Prerequisites
+
+- Python 3.10+
+- GPU optional (required only for `04b_model_exploration_gru.ipynb` at scale; Colab recommended)
 
 ### Environment Setup
 
@@ -211,6 +266,8 @@ pip install -r requirements.txt
 
 ### Data Download
 
+Raw data files are not included due to file size (> 500 MB total). See [`data/README.md`](data/README.md) for full instructions.
+
 ```bash
 pip install kaggle
 kaggle competitions download -c m5-forecasting-accuracy
@@ -219,17 +276,17 @@ unzip m5-forecasting-accuracy.zip -d data/raw/
 
 ### Configuration
 
-Each notebook has a configuration cell near the top where you set the data path for your environment:
+Each notebook has a configuration cell near the top. Update the path variables before running:
 
 ```python
 from pathlib import Path
 
-DATA_DIR    = Path("../data/raw")                              # Kaggle raw CSVs
-OUTPUT_DIR  = Path("./cleaned_data")                           # output of notebook 01
-DATA_PATH   = Path("../results/long_df_with_features.parquet") # output of notebook 03
+DATA_DIR   = Path("../data/raw")                               # Kaggle raw CSVs
+OUTPUT_DIR = Path("./cleaned_data")                            # output of notebook 01
+DATA_PATH  = Path("../results/long_df_with_features.parquet")  # output of notebook 03
 ```
 
-> **Google Colab users:** Uncomment the `drive.mount` cell at the top of each notebook and update the path variables to your Google Drive locations.
+> **Google Colab users:** Uncomment the `drive.mount` cell at the top of each notebook and update paths to your Google Drive locations.
 
 ### Recommended Execution Order
 
@@ -237,18 +294,19 @@ DATA_PATH   = Path("../results/long_df_with_features.parquet") # output of noteb
 01 → 02 (optional) → 03 → 04c → 05
 ```
 
-Notebooks `04a` and `04b` can be run independently after `03` and are not required to reproduce the final submission. The `experiments/` notebooks are standalone and document the pre-consolidation ablation runs.
+Notebooks `04a` and `04b` can be run independently after `03` and are not required to reproduce the final submission.
 
 ---
 
-## Project Highlights
+## Dataset
 
-- **Systematic feature ablation** — 16 controlled experiments with a consistent train/validation split, each reporting RMSE, rather than ad-hoc feature addition
-- **Leakage-safe feature design** — all lag and rolling features explicitly account for the 28-day forecast horizon, with documented shift values
-- **Two-phase hyperparameter search** — grid search for direction, Optuna for precision, with full logging of all 40+ trials
-- **Seed ensemble** — final submission averages predictions across 3 random seeds to reduce variance
-- **Recursive forecasting implementation** — correctly handles the M5 evaluation setup where future demand is unknown at inference time
-- **Multi-model comparison** — four model families (tree ensemble, linear, RNN, gradient boosting) evaluated on consistent data splits
+**Source:** [Kaggle M5 Forecasting — Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy)
+
+| File | Description | Size |
+|---|---|---|
+| `sales_train_evaluation.csv` | Daily unit sales — 3,049 items × 1,941 days (wide format) | ~120 MB |
+| `sell_prices.csv` | Weekly item sell price per store | ~200 MB |
+| `calendar.csv` | Date metadata — day-of-week, SNAP flags, event names | ~100 KB |
 
 ---
 
@@ -265,8 +323,8 @@ Notebooks `04a` and `04b` can be run independently after `03` and are not requir
 
 ## Acknowledgments
 
-- [Kaggle M5 Forecasting — Accuracy competition](https://www.kaggle.com/competitions/m5-forecasting-accuracy) for the dataset and evaluation framework
-- [LightGBM](https://lightgbm.readthedocs.io), [Optuna](https://optuna.org), [TensorFlow/Keras](https://www.tensorflow.org), and [scikit-learn](https://scikit-learn.org) teams for open-source tooling
+- [Kaggle M5 Forecasting — Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy) for the dataset and evaluation framework
+- [LightGBM](https://lightgbm.readthedocs.io), [Optuna](https://optuna.org), [TensorFlow/Keras](https://www.tensorflow.org), and [scikit-learn](https://scikit-learn.org) for open-source tooling
 
 ---
 

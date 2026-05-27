@@ -62,9 +62,6 @@ This project applies the M5 Forecasting Accuracy competition dataset — 30,490 
 │   ├── presentation.pdf
 │   └── project_report.pdf
 │
-├── data/
-│   └── README.md                                   # Kaggle download instructions
-│
 └── .gitignore
 ```
 

@@ -321,6 +321,18 @@ Notebooks `04a` and `04b` can be run independently after `03` and are not requir
 
 ---
 
+## Team
+
+| Member | Contributions |
+|---|---|
+| Chingfen Hung | Baseline pipeline · Early feature engineering experiments · Final LightGBM fine-tuning |
+| Davey Johnson | Data cleaning & preparation · Random Forest · Ridge Regression |
+| Ko-Jung Hsu | GRU (RNN) model · External data integration |
+| Evelyn Lai | External data integration · Final LightGBM fine-tuning |
+| Tzu-Yu Chen | Early feature engineering experiments · Feature engineering (later stage) |
+
+---
+
 ## Acknowledgments
 
 - [Kaggle M5 Forecasting — Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy) for the dataset and evaluation framework

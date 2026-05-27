@@ -256,7 +256,7 @@ pip install -r requirements.txt
 
 ### Data Download
 
-Raw data files are not included due to file size (> 500 MB total). See [`data/README.md`](data/README.md) for full instructions.
+Raw data files are not included due to file size (> 500 MB total). Use Kaggle API to load data as below instructions.
 
 ```bash
 pip install kaggle

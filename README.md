@@ -1,8 +1,8 @@
 # M5 Sales Forecasting — Retail Demand Prediction at Scale
 
-**A end-to-end machine learning pipeline for 28-day retail demand forecasting**
+**An end-to-end machine learning pipeline for 28-day retail demand forecasting**
 
-📍 University of Minnesota · Carlson School of Management · MSBA Program
+📍 University of Minnesota · Carlson School of Management · MSBA Program · MSBA 6421 Predictive Analytics
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "objective": "tweedie",
+  "metric": "rmse",
+  "boosting_type": "gbdt",
+  "bagging_freq": 1,
+  "verbosity": -1,
+  "seed": 42,
+  "learning_rate": 0.041858462747989315,
+  "num_leaves": 91,
+  "min_data_in_leaf": 85,
+  "tweedie_variance_power": 1.2765900380701871,
+  "lambda_l1": 0.8683198414627746,
+  "lambda_l2": 0.35976328628132526,
+  "feature_fraction": 0.6987745525049156,
+  "bagging_fraction": 0.8688864780847736,
+  "best_iteration_from_tuning": 152,
+  "validation_rmse_from_tuning": 2.002561220831971,
+  "source": "optuna_trial_37"
+}

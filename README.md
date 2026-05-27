@@ -24,8 +24,6 @@ This project applies the M5 Forecasting Accuracy competition dataset — 30,490 
 
 **Best Kaggle submission:** 3-seed LightGBM ensemble · Private WRMSSE **0.59212** · Public WRMSSE 0.62949
 
-![Model Comparison](results/images/model_comparison.png)
-
 | Model | RMSE | MAE | Notes |
 |---|---|---|---|
 | **LightGBM (Tuned)** | **2.0025** | **1.011** | Optuna trial 37; 18 features; 152 iterations |
@@ -57,13 +55,8 @@ This project applies the M5 Forecasting Accuracy competition dataset — 30,490 
 │   ├── model_performance_summary.csv
 │   ├── experiment_results_summary.csv
 │   ├── feature_engineering_table.csv
-│   ├── final_model_feature_importance.csv
 │   ├── best_lgbm_params.json
-│   ├── kaggle_best_score.png
-│   └── images/
-│       ├── model_comparison.png
-│       ├── feature_importance.png
-│       └── fe_experiments.png
+│   └── kaggle_best_score.png
 │
 ├── docs/
 │   ├── presentation.pdf
@@ -72,7 +65,6 @@ This project applies the M5 Forecasting Accuracy competition dataset — 30,490 
 ├── data/
 │   └── README.md                                   # Kaggle download instructions
 │
-├── requirements.txt
 └── .gitignore
 ```
 
@@ -144,8 +136,6 @@ Runs 16 controlled ablation experiments to identify which features improve over 
 | **E7+E1 — Combination ★** | **`snap_flag`, `is_event`, `lag_56`** | **2.1322** | **−0.0297** |
 | E9 — All E5~E8 | All price/promo/event/hierarchy | 2.1364 | −0.0255 |
 | E2 — Demand lag | `lag_365` | 2.1864 | +0.0245 *(rejected)* |
-
-![Feature Engineering Experiments](results/images/fe_experiments.png)
 
 **Leakage-safety principle:** all lag and rolling features use a minimum shift equal to or beyond the 28-day forecast horizon. `lag_56` is the shortest safe additional lag; `lag_365` introduced too many NaNs at series start and was rejected.
 

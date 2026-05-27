@@ -1,0 +1,18 @@
+Feature Name,Category,Source,Description,Leakage-safe,RMSE (alone),Keep
+lag_56,Internal,demand,Sales 56 days ago,shift(56),2.1578,✓
+snap_flag,External,calendar,SNAP benefit active in state on that day,known at prediction,2.1421,✓
+is_event,External,calendar,Any event/holiday on that day,known at prediction,2.1421,✓
+lag_365,Internal,demand,Sales 365 days ago,shift(365),2.1864,✗ — too many NaNs
+rstd_28,Internal,demand,28-day rolling std of lag_28,rolling on lag_28,2.1623,✗
+rmax_28,Internal,demand,28-day rolling max of lag_28,rolling on lag_28,2.1596,✗
+rmin_28,Internal,demand,28-day rolling min of lag_28,rolling on lag_28,2.1596,✗
+price_vs_mean,Internal,sell_price,Price / item historical mean price,historical mean,2.159,✗
+price_vs_dept_avg,Internal,sell_price,Price / dept average price on same day,same-day groupby,2.159,✗
+is_price_drop,Internal,sell_price,Price lower than previous day,price_lag_1,2.1605,✗
+is_price_min_7d,Internal,sell_price,Price is 7-day local minimum,shift(1).rolling(7),2.1605,✗
+dept_avg_demand,Internal,demand,"Dept-store avg demand, lag28 + rolling28",shift(28).rolling(28),2.16,✗
+store_avg_demand,Internal,demand,"Store avg demand, lag28 + rolling28",shift(28).rolling(28),2.16,✗
+is_hot_day,External,weather.csv,Extreme high temperature day,known at prediction,2.1618,✗
+is_cold_night,External,weather.csv,Extreme low temperature night,known at prediction,2.1618,✗
+tmax_z,External,weather.csv,Max temperature z-score (state × month),known at prediction,2.1618,✗
+tmin_z,External,weather.csv,Min temperature z-score (state × month),known at prediction,2.1618,✗

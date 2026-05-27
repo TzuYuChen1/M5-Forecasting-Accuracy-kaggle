@@ -1,0 +1,18 @@
+Experiment,Feature Group,Added Features,RMSE,vs Baseline
+E0,Baseline,None,2.1619,-
+E1,Demand lag,lag_56,2.1578,-0.0041
+E2,Demand lag,lag_365,2.1864,0.0245
+E3,Rolling,"rstd_28, rmean_56",2.1623,0.0004
+E4,Rolling extreme,"rmax_28, rmin_28",2.1596,-0.0023
+E10,Demand combo,"lag_56, rmax_28, rmin_28",2.1595,-0.0024
+E5,Price,"price_vs_mean, price_vs_dept_avg",2.159,-0.0029
+E6,Promo,"is_price_drop, is_price_min_7d",2.1605,-0.0014
+E7,Event & SNAP,"snap_flag, is_event",2.1421,-0.0198
+E8,Hierarchy,"dept_avg_demand, store_avg_demand",2.16,-0.0019
+E9,E5+E6+E7+E8,All E5~E8,2.1364,-0.0255
+ext_weather,External — Weather,"is_hot_day, is_cold_night, tmax_z, tmin_z",2.1618,-0.0001
+ext_snap_event,External — Event,"snap_flag, is_event",2.1379,-0.024
+ext_all,External — All,"snap_flag, is_event + weather",2.1418,-0.0201
+E7_E1,Combination ★ BEST,"snap_flag, is_event, lag_56",2.1322,-0.0297
+E7_E5,Combination,"snap_flag, is_event, price features",2.1401,-0.0218
+E9_E1,Combination,All E5~E8 + lag_56,2.1354,-0.0265
